@@ -54,22 +54,6 @@ cargo test
 
 - **[Theory & Design](docs/THEORY_AND_DESIGN.md)**: Architecture and cryptographic foundations
 - **[Practical Guide](docs/PRACTICAL_GUIDE.md)**: Step-by-step implementation guide
-- **[CLAUDE.md](CLAUDE.md)**: AI assistance instructions
-
-## 🎯 Use Cases
-
-- **Zero-Knowledge Proofs**: Efficient Merkle tree operations and commitments
-- **Privacy Protocols**: On-chain privacy-preserving computations
-- **DeFi Applications**: High-performance cryptographic primitives
-- **Cross-Chain Bridges**: Optimized hash verification
-
-## 🤝 Contributing
-
-We welcome contributions! This project is open-source under the MIT license. Feel free to:
-- Submit issues and feature requests
-- Create pull requests
-- Share your precompile implementations
-- Improve documentation
 
 ## 🔗 Resources
 
