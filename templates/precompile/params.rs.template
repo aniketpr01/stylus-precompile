@@ -1,0 +1,123 @@
+use alloy_primitives::U256;
+
+/// Parameters for {{PRECOMPILE_PASCAL}} precompile
+#[derive(Debug, Clone)]
+pub struct {{PRECOMPILE_PASCAL}}Params {
+    /// Example parameter - replace with actual parameters for your precompile
+    pub example_param: U256,
+    
+    // TODO: Add specific parameters for {{PRECOMPILE_PASCAL}}
+    // Examples:
+    // pub algorithm_variant: AlgorithmVariant,
+    // pub security_level: SecurityLevel,
+    // pub buffer_size: usize,
+    // pub round_count: usize,
+}
+
+impl Default for {{PRECOMPILE_PASCAL}}Params {
+    fn default() -> Self {
+        Self {
+            example_param: U256::from(42),
+            
+            // TODO: Set default values for your parameters
+        }
+    }
+}
+
+/// Default parameters for {{PRECOMPILE_PASCAL}}
+pub const {{PRECOMPILE_UPPER}}_PARAMS: {{PRECOMPILE_PASCAL}}Params = {{PRECOMPILE_PASCAL}}Params {
+    example_param: U256::from_limbs([42, 0, 0, 0]),
+    
+    // TODO: Define constant parameters if needed
+};
+
+// TODO: Add parameter validation and configuration enums if needed
+// Examples:
+
+// #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+// pub enum AlgorithmVariant {
+//     Standard,
+//     Optimized,
+//     Secure,
+// }
+
+// #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+// pub enum SecurityLevel {
+//     Low = 128,
+//     Medium = 192,
+//     High = 256,
+// }
+
+impl {{PRECOMPILE_PASCAL}}Params {
+    /// Create parameters with custom values
+    pub fn new(example_param: U256) -> Self {
+        Self {
+            example_param,
+        }
+    }
+
+    /// Validate parameter values
+    pub fn validate(&self) -> Result<(), &'static str> {
+        // TODO: Add validation logic for your parameters
+        // Examples:
+        // if self.example_param.is_zero() {
+        //     return Err("Example parameter cannot be zero");
+        // }
+        
+        Ok(())
+    }
+
+    /// Get optimized parameters for performance
+    pub fn optimized() -> Self {
+        Self {
+            example_param: U256::from(1000),
+            // TODO: Set optimized values
+        }
+    }
+
+    /// Get secure parameters for high security
+    pub fn secure() -> Self {
+        Self {
+            example_param: U256::from(2048),
+            // TODO: Set secure values
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_default_params() {
+        let params = {{PRECOMPILE_PASCAL}}Params::default();
+        assert_eq!(params.example_param, U256::from(42));
+        assert!(params.validate().is_ok());
+    }
+
+    #[test]
+    fn test_custom_params() {
+        let params = {{PRECOMPILE_PASCAL}}Params::new(U256::from(100));
+        assert_eq!(params.example_param, U256::from(100));
+        assert!(params.validate().is_ok());
+    }
+
+    #[test]
+    fn test_optimized_params() {
+        let params = {{PRECOMPILE_PASCAL}}Params::optimized();
+        assert_eq!(params.example_param, U256::from(1000));
+        assert!(params.validate().is_ok());
+    }
+
+    #[test]
+    fn test_secure_params() {
+        let params = {{PRECOMPILE_PASCAL}}Params::secure();
+        assert_eq!(params.example_param, U256::from(2048));
+        assert!(params.validate().is_ok());
+    }
+
+    #[test]
+    fn test_const_params() {
+        assert_eq!({{PRECOMPILE_UPPER}}_PARAMS.example_param, U256::from(42));
+    }
+}

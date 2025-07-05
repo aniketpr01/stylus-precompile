@@ -1,0 +1,35 @@
+{
+  "name": "precompile-contracts",
+  "version": "1.0.0",
+  "description": "Smart contract testing for Poseidon Hash Precompile",
+  "scripts": {
+    "test": "hardhat test",
+    "test:sepolia": "hardhat test --network arbitrumSepolia",
+    "test:benchmark": "hardhat test test/PoseidonGasBenchmark.test.js --network arbitrumSepolia",
+    "compile": "hardhat compile",
+    "deploy": "hardhat run scripts/deploy.js",
+    "deploy:stylus": "npx ts-node scripts/deploy-stylus.ts",
+    "deploy:retry": "npx ts-node scripts/deploy-stylus-retry.ts",
+    "lint": "prettier --check .",
+    "lint:fix": "prettier --write ."
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.25.0",
+    "prettier": "^3.0.0",
+    "prettier-plugin-solidity": "^1.2.0"
+  },
+  "keywords": [
+    "solidity",
+    "ethereum",
+    "arbitrum",
+    "stylus",
+    "precompile",
+    "poseidon",
+    "zk"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^17.0.1"
+  }
+}

@@ -1,0 +1,215 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "../interfaces/I{{PRECOMPILE_PASCAL}}.sol";
+
+/**
+ * @title {{PRECOMPILE_PASCAL}}Example
+ * @dev Example contract demonstrating {{PRECOMPILE_PASCAL}} precompile usage
+ * @notice This contract shows various use cases for the {{PRECOMPILE_PASCAL}} function
+ */
+contract {{PRECOMPILE_PASCAL}}Example {
+    /// @dev Address of the {{PRECOMPILE_PASCAL}} precompile
+    address public constant {{PRECOMPILE_UPPER}}_PRECOMPILE = address(0x100);
+    
+    /// @dev Event emitted when computation is performed
+    event {{PRECOMPILE_PASCAL}}Computed(string method, bytes32 resultHash, uint256 gasUsed);
+    
+    /// @dev Event emitted for demonstration purposes
+    event ExampleCompleted(string exampleName, bool success);
+    
+    /**
+     * @dev Basic {{PRECOMPILE_PASCAL}} computation
+     * @param input The input data
+     * @return result The computed result
+     */
+    function compute{{PRECOMPILE_PASCAL}}(bytes calldata input) external returns (bytes memory result) {
+        uint256 gasStart = gasleft();
+        
+        (bool success, bytes memory output) = {{PRECOMPILE_UPPER}}_PRECOMPILE.staticcall(
+            abi.encodeWithSelector(I{{PRECOMPILE_PASCAL}}.{{PRECOMPILE_LOWER}}.selector, input)
+        );
+        
+        require(success, "{{PRECOMPILE_PASCAL}} call failed");
+        result = abi.decode(output, (bytes));
+        
+        emit {{PRECOMPILE_PASCAL}}Computed("basic", keccak256(result), gasStart - gasleft());
+    }
+    
+    /**
+     * @dev Example 1: Simple data processing
+     * @param data The data to process
+     * @return processed The processed data
+     */
+    function example1_SimpleProcessing(bytes calldata data) external returns (bytes memory processed) {
+        (bool success, bytes memory result) = {{PRECOMPILE_UPPER}}_PRECOMPILE.staticcall(
+            abi.encodeWithSelector(I{{PRECOMPILE_PASCAL}}.{{PRECOMPILE_LOWER}}.selector, data)
+        );
+        
+        if (success) {
+            processed = abi.decode(result, (bytes));
+            emit ExampleCompleted("SimpleProcessing", true);
+        } else {
+            emit ExampleCompleted("SimpleProcessing", false);
+            revert("Simple processing failed");
+        }
+    }
+    
+    /**
+     * @dev Example 2: Batch processing multiple inputs
+     * @param inputs Array of input data
+     * @return results Array of processed results
+     */
+    function example2_BatchProcessing(bytes[] calldata inputs) external returns (bytes[] memory results) {
+        results = new bytes[](inputs.length);
+        
+        for (uint256 i = 0; i < inputs.length; i++) {
+            (bool success, bytes memory result) = {{PRECOMPILE_UPPER}}_PRECOMPILE.staticcall(
+                abi.encodeWithSelector(I{{PRECOMPILE_PASCAL}}.{{PRECOMPILE_LOWER}}.selector, inputs[i])
+            );
+            
+            if (success) {
+                results[i] = abi.decode(result, (bytes));
+            } else {
+                results[i] = "";
+            }
+        }
+        
+        emit ExampleCompleted("BatchProcessing", true);
+    }
+    
+    /**
+     * @dev Example 3: Conditional processing based on input size
+     * @param input The input data
+     * @return result The processed result
+     */
+    function example3_ConditionalProcessing(bytes calldata input) external returns (bytes memory result) {
+        if (input.length == 0) {
+            emit ExampleCompleted("ConditionalProcessing", false);
+            revert("Empty input not allowed");
+        }
+        
+        // Different processing based on input size
+        if (input.length < 32) {
+            // Small input processing
+            result = this.processSmallInput(input);
+        } else {
+            // Large input processing
+            result = this.processLargeInput(input);
+        }
+        
+        emit ExampleCompleted("ConditionalProcessing", true);
+    }
+    
+    /**
+     * @dev Process small input data
+     * @param input Small input data (< 32 bytes)
+     * @return result Processed result
+     */
+    function processSmallInput(bytes calldata input) external returns (bytes memory result) {
+        (bool success, bytes memory output) = {{PRECOMPILE_UPPER}}_PRECOMPILE.staticcall(
+            abi.encodeWithSelector(I{{PRECOMPILE_PASCAL}}.{{PRECOMPILE_LOWER}}.selector, input)
+        );
+        
+        require(success, "Small input processing failed");
+        result = abi.decode(output, (bytes));
+    }
+    
+    /**
+     * @dev Process large input data
+     * @param input Large input data (>= 32 bytes)
+     * @return result Processed result
+     */
+    function processLargeInput(bytes calldata input) external returns (bytes memory result) {
+        // For large inputs, might want to process in chunks
+        bytes memory chunk1 = input[:32];
+        bytes memory chunk2 = input[32:];
+        
+        // Process first chunk
+        (bool success1, bytes memory result1) = {{PRECOMPILE_UPPER}}_PRECOMPILE.staticcall(
+            abi.encodeWithSelector(I{{PRECOMPILE_PASCAL}}.{{PRECOMPILE_LOWER}}.selector, chunk1)
+        );
+        
+        require(success1, "Large input chunk 1 processing failed");
+        
+        if (chunk2.length > 0) {
+            // Process second chunk
+            (bool success2, bytes memory result2) = {{PRECOMPILE_UPPER}}_PRECOMPILE.staticcall(
+                abi.encodeWithSelector(I{{PRECOMPILE_PASCAL}}.{{PRECOMPILE_LOWER}}.selector, chunk2)
+            );
+            
+            require(success2, "Large input chunk 2 processing failed");
+            
+            // Combine results (implementation specific)
+            result = abi.encodePacked(abi.decode(result1, (bytes)), abi.decode(result2, (bytes)));
+        } else {
+            result = abi.decode(result1, (bytes));
+        }
+    }
+    
+    /**
+     * @dev Example 4: Error handling and recovery
+     * @param input The input data
+     * @return result The processed result or default value
+     * @return success Whether processing succeeded
+     */
+    function example4_ErrorHandling(bytes calldata input) external returns (bytes memory result, bool success) {
+        (success, bytes memory output) = {{PRECOMPILE_UPPER}}_PRECOMPILE.staticcall(
+            abi.encodeWithSelector(I{{PRECOMPILE_PASCAL}}.{{PRECOMPILE_LOWER}}.selector, input)
+        );
+        
+        if (success) {
+            result = abi.decode(output, (bytes));
+            emit ExampleCompleted("ErrorHandling", true);
+        } else {
+            // Return default/fallback result
+            result = new bytes(32); // Default empty result
+            emit ExampleCompleted("ErrorHandling", false);
+        }
+    }
+    
+    /**
+     * @dev Example 5: Integration with other contracts
+     * @param input The input data
+     * @param targetContract Address of contract to send result to
+     * @return success Whether the entire operation succeeded
+     */
+    function example5_Integration(bytes calldata input, address targetContract) external returns (bool success) {
+        // Process with {{PRECOMPILE_PASCAL}}
+        (bool computeSuccess, bytes memory output) = {{PRECOMPILE_UPPER}}_PRECOMPILE.staticcall(
+            abi.encodeWithSelector(I{{PRECOMPILE_PASCAL}}.{{PRECOMPILE_LOWER}}.selector, input)
+        );
+        
+        if (!computeSuccess) {
+            emit ExampleCompleted("Integration", false);
+            return false;
+        }
+        
+        bytes memory result = abi.decode(output, (bytes));
+        
+        // Forward result to target contract (example)
+        (bool forwardSuccess,) = targetContract.call(
+            abi.encodeWithSignature("processResult(bytes)", result)
+        );
+        
+        success = forwardSuccess;
+        emit ExampleCompleted("Integration", success);
+    }
+    
+    /**
+     * @dev Get gas cost estimation for {{PRECOMPILE_PASCAL}} computation
+     * @param input The input data
+     * @return gasUsed Estimated gas usage
+     */
+    function estimateGas(bytes calldata input) external returns (uint256 gasUsed) {
+        uint256 gasStart = gasleft();
+        
+        (bool success,) = {{PRECOMPILE_UPPER}}_PRECOMPILE.staticcall(
+            abi.encodeWithSelector(I{{PRECOMPILE_PASCAL}}.{{PRECOMPILE_LOWER}}.selector, input)
+        );
+        
+        gasUsed = gasStart - gasleft();
+        
+        require(success, "Gas estimation failed");
+    }
+}

@@ -1,0 +1,48 @@
+[package]
+name = "precompile"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+alloy-primitives = "0.8"
+alloy-sol-types = "0.8"
+hex = "0.4"
+thiserror = "1.0"
+poseidon-rs = "0.0.10"
+ff_ce = "0.11"
+stylus-sdk = "0.6"
+clap = { version = "4.5", features = ["derive"], optional = true }
+colored = { version = "2.0", optional = true }
+dialoguer = { version = "0.11", optional = true }
+indicatif = { version = "0.17", optional = true }
+serde = { version = "1.0", features = ["derive"], optional = true }
+serde_json = { version = "1.0", optional = true }
+toml = { version = "0.8", optional = true }
+# which = "6.0" # Removed due to WASM compatibility issues
+tempfile = { version = "3.8", optional = true }
+anyhow = { version = "1.0", optional = true }
+
+[features]
+default = ["std"]
+std = []
+stylus = []
+export-abi = ["stylus-sdk/export-abi", "stylus"]
+cli = ["dep:clap", "dep:colored", "dep:dialoguer", "dep:indicatif", "dep:serde", "dep:serde_json", "dep:toml", "dep:tempfile", "dep:anyhow", "std"]
+individual-contracts = ["stylus"]
+
+[dev-dependencies]
+hex-literal = "0.4"
+
+# Minimal binary target for cargo stylus deployment
+[[bin]]
+name = "deployment-runner"
+path = "src/main.rs"
+
+# CLI binary for stylus-forge
+[[bin]]
+name = "stylus-forge"
+path = "src/main.rs"
+required-features = ["cli"]
+
+[lib]
+crate-type = ["cdylib", "rlib"]

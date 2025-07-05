@@ -1,0 +1,105 @@
+{
+  "timestamp": "2025-07-05T15:17:19.911Z",
+  "network": "arbitrum-sepolia",
+  "chainId": "421614",
+  "precompileAddress": "0xca466489bb94f76f731342df984e8fdfb89102ea",
+  "results": [
+    {
+      "operation": "single_hash_42",
+      "precompileGas": 40909,
+      "solidityGas": 553176,
+      "improvement": 93,
+      "inputSize": 32
+    },
+    {
+      "operation": "single_hash_12345",
+      "precompileGas": 41056,
+      "solidityGas": 553176,
+      "improvement": 93,
+      "inputSize": 32
+    },
+    {
+      "operation": "single_hash_1000000000000000000000000000000",
+      "precompileGas": 41191,
+      "solidityGas": 553176,
+      "improvement": 93,
+      "inputSize": 32
+    },
+    {
+      "operation": "single_hash_21888242871839275222246405745257275088548364400416034343698204186575808495616",
+      "precompileGas": 40893,
+      "solidityGas": 553176,
+      "improvement": 93,
+      "inputSize": 32
+    },
+    {
+      "operation": "pair_hash_100_200",
+      "precompileGas": 41028,
+      "solidityGas": 553254,
+      "improvement": 93,
+      "inputSize": 64
+    },
+    {
+      "operation": "pair_hash_1000000000000000000000000000000_2000000000000000000000000000000",
+      "precompileGas": 41237,
+      "solidityGas": 553254,
+      "improvement": 93,
+      "inputSize": 64
+    },
+    {
+      "operation": "pair_hash_42_0",
+      "precompileGas": 40967,
+      "solidityGas": 553254,
+      "improvement": 93,
+      "inputSize": 64
+    },
+    {
+      "operation": "pair_hash_0_0",
+      "precompileGas": 40831,
+      "solidityGas": 553254,
+      "improvement": 93,
+      "inputSize": 64
+    },
+    {
+      "operation": "array_hash_2",
+      "precompileGas": 41173,
+      "solidityGas": 553646,
+      "improvement": 93,
+      "inputSize": 64
+    },
+    {
+      "operation": "array_hash_3",
+      "precompileGas": 80253,
+      "solidityGas": 1111500,
+      "improvement": 93,
+      "inputSize": 96
+    },
+    {
+      "operation": "array_hash_5",
+      "precompileGas": 157946,
+      "solidityGas": 2240671,
+      "improvement": 93,
+      "inputSize": 160
+    },
+    {
+      "operation": "array_hash_10",
+      "precompileGas": 352693,
+      "solidityGas": 5142060,
+      "improvement": 93,
+      "inputSize": 320
+    },
+    {
+      "operation": "zk_single_hash",
+      "precompileGas": 41662,
+      "solidityGas": 124986,
+      "improvement": 67,
+      "inputSize": 64
+    }
+  ],
+  "summary": {
+    "averageImprovement": 91,
+    "totalTests": 13,
+    "maxImprovement": 93,
+    "minImprovement": 67
+  }
+}

@@ -1,0 +1,105 @@
+use alloy_sol_types::{sol, SolCall, SolValue};
+use crate::errors::PoseidonError; // TODO: Create {{PRECOMPILE_PASCAL}}Error
+use super::core::{{PRECOMPILE_PASCAL}};
+
+// Solidity interface definition
+sol! {
+    interface I{{PRECOMPILE_PASCAL}} {
+        /// Main function for {{PRECOMPILE_PASCAL}} computation
+        /// @param input The input data
+        /// @return output The computed result
+        function {{PRECOMPILE_LOWER}}(bytes input) external pure returns (bytes output);
+        
+        // TODO: Add more specific functions based on your precompile's needs
+        // Examples:
+        // function {{PRECOMPILE_LOWER}}WithParams(bytes input, uint256 param) external pure returns (bytes output);
+        // function {{PRECOMPILE_LOWER}}Batch(bytes[] inputs) external pure returns (bytes[] outputs);
+    }
+}
+
+/// Precompile entry point - handles the raw call interface
+pub fn {{PRECOMPILE_LOWER}}_precompile(input: &[u8]) -> Result<Vec<u8>, PoseidonError> {
+    if input.len() < 4 {
+        return Err(PoseidonError::InvalidSelector);
+    }
+
+    let selector = &input[0..4];
+    let call_data = &input[4..];
+
+    let processor = {{PRECOMPILE_PASCAL}}::new();
+
+    match selector {
+        // {{PRECOMPILE_LOWER}}(bytes)
+        s if s == I{{PRECOMPILE_PASCAL}}::{{PRECOMPILE_LOWER}}Call::SELECTOR => {
+            let decoded = I{{PRECOMPILE_PASCAL}}::{{PRECOMPILE_LOWER}}Call::abi_decode(call_data, true)
+                .map_err(|e| PoseidonError::AbiDecodeError(e.to_string()))?;
+
+            let result = processor.compute(&decoded.input)?;
+            Ok(result)
+        }
+
+        // TODO: Add more function handlers
+        // Example:
+        // s if s == I{{PRECOMPILE_PASCAL}}::{{PRECOMPILE_LOWER}}WithParamsCall::SELECTOR => {
+        //     let decoded = I{{PRECOMPILE_PASCAL}}::{{PRECOMPILE_LOWER}}WithParamsCall::abi_decode(call_data, true)
+        //         .map_err(|e| PoseidonError::AbiDecodeError(e.to_string()))?;
+        //     
+        //     let result = processor.compute_with_params(&decoded.input, decoded.param)?;
+        //     Ok(result)
+        // }
+
+        _ => Err(PoseidonError::InvalidSelector),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use alloy_primitives::Bytes;
+
+    #[test]
+    fn test_{{PRECOMPILE_LOWER}}_interface_basic() {
+        let input_data = b"test data";
+        let call = I{{PRECOMPILE_PASCAL}}::{{PRECOMPILE_LOWER}}Call {
+            input: Bytes::from(input_data.as_slice()),
+        };
+        
+        let encoded = call.abi_encode();
+        let mut full_input = I{{PRECOMPILE_PASCAL}}::{{PRECOMPILE_LOWER}}Call::SELECTOR.to_vec();
+        full_input.extend_from_slice(&encoded);
+        
+        let result = {{PRECOMPILE_LOWER}}_precompile(&full_input);
+        assert!(result.is_ok());
+        
+        let output = result.unwrap();
+        assert!(!output.is_empty());
+    }
+
+    #[test]
+    fn test_{{PRECOMPILE_LOWER}}_invalid_selector() {
+        let invalid_input = vec![0xFF, 0xFF, 0xFF, 0xFF]; // Invalid selector
+        
+        let result = {{PRECOMPILE_LOWER}}_precompile(&invalid_input);
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), PoseidonError::InvalidSelector));
+    }
+
+    #[test]
+    fn test_{{PRECOMPILE_LOWER}}_short_input() {
+        let short_input = vec![0x00, 0x01]; // Less than 4 bytes
+        
+        let result = {{PRECOMPILE_LOWER}}_precompile(&short_input);
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), PoseidonError::InvalidSelector));
+    }
+
+    #[test]
+    fn test_{{PRECOMPILE_LOWER}}_malformed_abi() {
+        let mut malformed_input = I{{PRECOMPILE_PASCAL}}::{{PRECOMPILE_LOWER}}Call::SELECTOR.to_vec();
+        malformed_input.extend_from_slice(&[0xFF; 10]); // Invalid ABI data
+        
+        let result = {{PRECOMPILE_LOWER}}_precompile(&malformed_input);
+        assert!(result.is_err());
+        assert!(matches!(result.unwrap_err(), PoseidonError::AbiDecodeError(_)));
+    }
+}

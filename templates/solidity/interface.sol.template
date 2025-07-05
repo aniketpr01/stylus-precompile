@@ -1,0 +1,115 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+/**
+ * @title I{{PRECOMPILE_PASCAL}}
+ * @dev Interface for {{PRECOMPILE_PASCAL}} precompile
+ * @notice {{DESCRIPTION}}
+ */
+interface I{{PRECOMPILE_PASCAL}} {
+    /**
+     * @dev Main {{PRECOMPILE_PASCAL}} computation function
+     * @param input The input data for {{PRECOMPILE_PASCAL}}
+     * @return output The computed result
+     */
+    function {{PRECOMPILE_LOWER}}(bytes calldata input) external pure returns (bytes memory output);
+    
+    // TODO: Add more specific functions based on your precompile's needs
+    // Examples:
+    
+    /**
+     * @dev {{PRECOMPILE_PASCAL}} computation with additional parameters
+     * @param input The input data
+     * @param param Additional parameter
+     * @return output The computed result
+     */
+    // function {{PRECOMPILE_LOWER}}WithParams(bytes calldata input, uint256 param) external pure returns (bytes memory output);
+    
+    /**
+     * @dev Batch {{PRECOMPILE_PASCAL}} computation
+     * @param inputs Array of input data
+     * @return outputs Array of computed results
+     */
+    // function {{PRECOMPILE_LOWER}}Batch(bytes[] calldata inputs) external pure returns (bytes[] memory outputs);
+}
+
+/**
+ * @title {{PRECOMPILE_PASCAL}}Precompile
+ * @dev Wrapper contract for the {{PRECOMPILE_PASCAL}} precompile
+ * @notice This contract provides a convenient interface to the WASM precompile
+ */
+contract {{PRECOMPILE_PASCAL}}Precompile {
+    /// @dev Address where the {{PRECOMPILE_PASCAL}} precompile is deployed
+    address public constant {{PRECOMPILE_UPPER}}_PRECOMPILE = address(0x100); // TODO: Update address
+
+    /// @dev Event emitted when {{PRECOMPILE_PASCAL}} computation is performed
+    event {{PRECOMPILE_PASCAL}}Computed(bytes32 indexed inputHash, uint256 gasUsed);
+
+    /**
+     * @dev Error thrown when precompile call fails
+     */
+    error {{PRECOMPILE_PASCAL}}CallFailed();
+
+    /**
+     * @dev Error thrown when input validation fails
+     */
+    error Invalid{{PRECOMPILE_PASCAL}}Input();
+
+    /**
+     * @dev Calls the {{PRECOMPILE_PASCAL}} precompile
+     * @param input The input data for {{PRECOMPILE_PASCAL}}
+     * @return output The computed result
+     */
+    function {{PRECOMPILE_LOWER}}(bytes calldata input) external returns (bytes memory output) {
+        if (input.length == 0) {
+            revert Invalid{{PRECOMPILE_PASCAL}}Input();
+        }
+
+        uint256 gasStart = gasleft();
+        
+        (bool success, bytes memory result) = {{PRECOMPILE_UPPER}}_PRECOMPILE.staticcall(
+            abi.encodeWithSelector(I{{PRECOMPILE_PASCAL}}.{{PRECOMPILE_LOWER}}.selector, input)
+        );
+
+        if (!success) {
+            revert {{PRECOMPILE_PASCAL}}CallFailed();
+        }
+        
+        output = abi.decode(result, (bytes));
+        
+        emit {{PRECOMPILE_PASCAL}}Computed(keccak256(input), gasStart - gasleft());
+    }
+
+    /**
+     * @dev Pure version of {{PRECOMPILE_PASCAL}} computation (no events)
+     * @param input The input data for {{PRECOMPILE_PASCAL}}
+     * @return output The computed result
+     */
+    function {{PRECOMPILE_LOWER}}Pure(bytes calldata input) external pure returns (bytes memory output) {
+        if (input.length == 0) {
+            revert Invalid{{PRECOMPILE_PASCAL}}Input();
+        }
+
+        (bool success, bytes memory result) = {{PRECOMPILE_UPPER}}_PRECOMPILE.staticcall(
+            abi.encodeWithSelector(I{{PRECOMPILE_PASCAL}}.{{PRECOMPILE_LOWER}}.selector, input)
+        );
+
+        if (!success) {
+            revert {{PRECOMPILE_PASCAL}}CallFailed();
+        }
+        
+        output = abi.decode(result, (bytes));
+    }
+
+    // TODO: Implement additional wrapper functions as needed
+    
+    /**
+     * @dev Validates input format (override in derived contracts for specific validation)
+     * @param input The input to validate
+     * @return valid True if input is valid
+     */
+    function isValidInput(bytes calldata input) external pure virtual returns (bool valid) {
+        return input.length > 0;
+        // TODO: Add specific validation logic for {{PRECOMPILE_PASCAL}}
+    }
+}

@@ -1,0 +1,6 @@
+.claude/
+.cursor/
+CLAUDE.md
+Proposal.md
+*.env
+contract/.env

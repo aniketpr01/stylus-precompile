@@ -1,0 +1,228 @@
+//! Tests for {{PRECOMPILE_PASCAL}} precompile
+
+use precompile::*;
+
+#[cfg(test)]
+mod {{PRECOMPILE_LOWER}}_tests {
+    use super::*;
+    use alloy_primitives::U256;
+
+    #[test]
+    fn test_{{PRECOMPILE_LOWER}}_basic_functionality() {
+        // TODO: Add basic functionality tests for {{PRECOMPILE_PASCAL}}
+        
+        // Example test structure:
+        // let input = b"test input";
+        // let result = {{PRECOMPILE_LOWER}}_function(input);
+        // assert!(result.is_ok());
+        // let output = result.unwrap();
+        // assert!(!output.is_empty());
+    }
+
+    #[test]
+    fn test_{{PRECOMPILE_LOWER}}_empty_input() {
+        // TODO: Test handling of empty input
+        
+        // Example:
+        // let empty_input = b"";
+        // let result = {{PRECOMPILE_LOWER}}_function(empty_input);
+        // assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_{{PRECOMPILE_LOWER}}_deterministic() {
+        // TODO: Test that {{PRECOMPILE_PASCAL}} produces deterministic results
+        
+        // Example:
+        // let input = b"deterministic test";
+        // let result1 = {{PRECOMPILE_LOWER}}_function(input);
+        // let result2 = {{PRECOMPILE_LOWER}}_function(input);
+        // assert_eq!(result1.unwrap(), result2.unwrap());
+    }
+
+    #[test]
+    fn test_{{PRECOMPILE_LOWER}}_different_inputs() {
+        // TODO: Test that different inputs produce different outputs
+        
+        // Example:
+        // let input1 = b"input 1";
+        // let input2 = b"input 2";
+        // let result1 = {{PRECOMPILE_LOWER}}_function(input1).unwrap();
+        // let result2 = {{PRECOMPILE_LOWER}}_function(input2).unwrap();
+        // assert_ne!(result1, result2);
+    }
+
+    #[test]
+    fn test_{{PRECOMPILE_LOWER}}_large_input() {
+        // TODO: Test handling of large inputs
+        
+        // Example:
+        // let large_input = vec![0xAB; 1024]; // 1KB of data
+        // let result = {{PRECOMPILE_LOWER}}_function(&large_input);
+        // assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_{{PRECOMPILE_LOWER}}_edge_cases() {
+        // TODO: Add edge case tests specific to {{PRECOMPILE_PASCAL}}
+        
+        // Examples of edge cases to test:
+        // - Minimum valid input
+        // - Maximum valid input
+        // - Boundary conditions
+        // - Special values or patterns
+    }
+
+    #[test]
+    fn test_{{PRECOMPILE_LOWER}}_performance() {
+        // TODO: Add performance tests
+        
+        // Example:
+        // let input = b"performance test input";
+        // let start = std::time::Instant::now();
+        // let _result = {{PRECOMPILE_LOWER}}_function(input).unwrap();
+        // let duration = start.elapsed();
+        // 
+        // // Assert reasonable performance
+        // assert!(duration.as_millis() < 100, "{{PRECOMPILE_PASCAL}} too slow: {:?}", duration);
+    }
+
+    #[test]
+    fn test_{{PRECOMPILE_LOWER}}_parameter_variations() {
+        // TODO: Test different parameter configurations if applicable
+        
+        // Example:
+        // let params1 = {{PRECOMPILE_PASCAL}}Params::default();
+        // let params2 = {{PRECOMPILE_PASCAL}}Params::optimized();
+        // let params3 = {{PRECOMPILE_PASCAL}}Params::secure();
+        // 
+        // // Test with different parameters
+        // let {{PRECOMPILE_LOWER}}1 = {{PRECOMPILE_PASCAL}}::with_params(params1);
+        // let {{PRECOMPILE_LOWER}}2 = {{PRECOMPILE_PASCAL}}::with_params(params2);
+        // let {{PRECOMPILE_LOWER}}3 = {{PRECOMPILE_PASCAL}}::with_params(params3);
+    }
+
+    #[test]
+    fn test_{{PRECOMPILE_LOWER}}_error_conditions() {
+        // TODO: Test various error conditions
+        
+        // Examples:
+        // - Invalid input format
+        // - Input too large
+        // - Input too small
+        // - Malformed data
+        // - Out of bounds values
+    }
+}
+
+#[cfg(test)]
+mod {{PRECOMPILE_LOWER}}_integration_tests {
+    use super::*;
+
+    #[test]
+    fn test_{{PRECOMPILE_LOWER}}_precompile_interface() {
+        // TODO: Test the precompile interface
+        
+        // Example:
+        // let input_data = b"interface test";
+        // let call = I{{PRECOMPILE_PASCAL}}::{{PRECOMPILE_LOWER}}Call {
+        //     input: Bytes::from(input_data.as_slice()),
+        // };
+        // 
+        // let encoded = call.abi_encode();
+        // let mut full_input = I{{PRECOMPILE_PASCAL}}::{{PRECOMPILE_LOWER}}Call::SELECTOR.to_vec();
+        // full_input.extend_from_slice(&encoded);
+        // 
+        // let result = {{PRECOMPILE_LOWER}}_precompile(&full_input);
+        // assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_{{PRECOMPILE_LOWER}}_abi_encoding() {
+        // TODO: Test ABI encoding/decoding
+        
+        // Test that data survives the encoding/decoding round trip
+    }
+
+    #[test]
+    fn test_{{PRECOMPILE_LOWER}}_selector_matching() {
+        // TODO: Test function selector matching
+        
+        // Verify that the correct selectors are recognized
+    }
+}
+
+#[cfg(test)]
+mod {{PRECOMPILE_LOWER}}_benchmark_tests {
+    use super::*;
+
+    #[test]
+    fn benchmark_{{PRECOMPILE_LOWER}}_small_input() {
+        // TODO: Benchmark with small inputs (< 100 bytes)
+        
+        // Example:
+        // let input = vec![0x42; 32];
+        // benchmark_{{PRECOMPILE_LOWER}}(&input, "small_input");
+    }
+
+    #[test]
+    fn benchmark_{{PRECOMPILE_LOWER}}_medium_input() {
+        // TODO: Benchmark with medium inputs (100-1KB)
+        
+        // Example:
+        // let input = vec![0x42; 512];
+        // benchmark_{{PRECOMPILE_LOWER}}(&input, "medium_input");
+    }
+
+    #[test]
+    fn benchmark_{{PRECOMPILE_LOWER}}_large_input() {
+        // TODO: Benchmark with large inputs (> 1KB)
+        
+        // Example:
+        // let input = vec![0x42; 4096];
+        // benchmark_{{PRECOMPILE_LOWER}}(&input, "large_input");
+    }
+
+    // Helper function for benchmarking
+    #[allow(dead_code)]
+    fn benchmark_{{PRECOMPILE_LOWER}}(input: &[u8], test_name: &str) {
+        let iterations = 1000;
+        let start = std::time::Instant::now();
+        
+        for _ in 0..iterations {
+            // let _result = {{PRECOMPILE_LOWER}}_function(input).unwrap();
+        }
+        
+        let duration = start.elapsed();
+        let avg_time = duration / iterations;
+        
+        println!("{{PRECOMPILE_PASCAL}} {} benchmark: avg {:?} per operation", test_name, avg_time);
+        
+        // Assert reasonable performance bounds
+        assert!(avg_time.as_micros() < 1000, "{{PRECOMPILE_PASCAL}} {} too slow: {:?}", test_name, avg_time);
+    }
+}
+
+// TODO: Add property-based tests if applicable
+// #[cfg(test)]
+// mod {{PRECOMPILE_LOWER}}_property_tests {
+//     use super::*;
+//     use quickcheck::quickcheck;
+// 
+//     quickcheck! {
+//         fn prop_{{PRECOMPILE_LOWER}}_deterministic(input: Vec<u8>) -> bool {
+//             if input.is_empty() {
+//                 return true; // Skip empty inputs
+//             }
+//             
+//             let result1 = {{PRECOMPILE_LOWER}}_function(&input);
+//             let result2 = {{PRECOMPILE_LOWER}}_function(&input);
+//             
+//             match (result1, result2) {
+//                 (Ok(r1), Ok(r2)) => r1 == r2,
+//                 (Err(_), Err(_)) => true,
+//                 _ => false,
+//             }
+//         }
+//     }
+// }

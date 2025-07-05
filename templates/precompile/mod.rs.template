@@ -1,0 +1,13 @@
+//! {{PRECOMPILE_PASCAL}} Precompile Module
+//!
+//! This module implements a {{PRECOMPILE_PASCAL}} precompile for Arbitrum Stylus.
+//! {{DESCRIPTION}}
+
+pub mod core;
+pub mod interface;
+pub mod params;
+
+// Re-export main types and functions
+pub use core::{{PRECOMPILE_PASCAL}};
+pub use interface::{{{PRECOMPILE_LOWER}}_precompile, I{{PRECOMPILE_PASCAL}}};
+pub use params::{{PRECOMPILE_UPPER}}_PARAMS;
