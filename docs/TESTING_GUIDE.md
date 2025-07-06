@@ -1,213 +1,311 @@
-# Stylus-Forge Testing Guide
+# Testing Guide
 
-This guide demonstrates the complete workflow for testing and using the stylus-forge CLI tool.
+Testing precompiles is different from testing regular contracts. Here's how to do it right.
 
-## Testing Results Summary
+## Why Testing Matters
 
-All milestone 1 features have been successfully tested:
+When you mess up a smart contract, you can redeploy. When you mess up a precompile, it's more complicated. So we test everything.
 
-### ✅ CLI Commands Tested
-1. **Build Command**: `cargo build --release --bin stylus-forge --features cli`
-   - Successfully built the CLI tool
-   - Output: `stylus-forge` binary in `target/release/`
+## The Testing Stack
 
-2. **Version Check**: `./stylus-forge --version`
-   - Output: `stylus-forge 0.1.0`
+We test at three levels:
+1. **Unit tests** - Does the algorithm work?
+2. **Integration tests** - Does the ABI work?
+3. **Contract tests** - Does it work from Solidity?
 
-3. **Help Command**: `./stylus-forge --help`
-   - Shows all available commands: init, create, build, test, deploy
+Each level catches different problems.
 
-4. **Init Command**: `./stylus-forge init demo-test --no-prompt`
-   - Created complete project structure
-   - Generated all necessary directories and files
-   - Initialized git repository
+## Unit Testing
 
-5. **Create Command**: `./stylus-forge create keccak256 --description "Keccak256 cryptographic hash function"`
-   - Generated 4 Rust files: core.rs, interface.rs, mod.rs, params.rs
-   - Created Solidity interface: IKeccak256.sol
-   - Generated test file: keccak256_tests.rs
-   - Updated lib.rs automatically
+This is where you test the core logic.
 
-6. **Test Command**: `cargo test --lib keccak256`
-   - All 13 generated tests passed
-   - Tests cover: creation, computation, validation, parameters, interface
+### Basic Test
 
-7. **Build Command**: `./stylus-forge build --release`
-   - Successfully builds for both native and WASM targets
-   - Runs clippy for code quality checks
-
-## Complete Developer Workflow
-
-### 1. Installation
-```bash
-# Clone the repository
-git clone <repository-url>
-cd precompile
-
-# Build the CLI
-cargo build --release --bin stylus-forge --features cli
-
-# Optional: Add to PATH
-export PATH="$PATH:$(pwd)/target/release"
-```
-
-### 2. Create a New Precompile Project
-```bash
-# Initialize a new project
-stylus-forge init my-crypto-precompiles
-
-# Navigate to project
-cd my-crypto-precompiles
-```
-
-### 3. Add Precompiles
-```bash
-# Create multiple precompiles
-stylus-forge create sha3 --description "SHA3 hash function"
-stylus-forge create ecdsa_verify --description "ECDSA signature verification"
-stylus-forge create merkle_proof --description "Merkle proof verification"
-```
-
-### 4. Implement the Algorithm
-Edit `src/<precompile>/core.rs` to add your implementation:
 ```rust
-pub fn compute(&self, input: &[u8]) -> Result<Vec<u8>, PoseidonError> {
-    // Your optimized algorithm here
+#[test]
+fn test_hash_works() {
+    let hasher = MyHasher::new();
+    let result = hasher.compute(b"hello").unwrap();
+    
+    // Make sure it produces the right output
+    assert_eq!(result.len(), 32);
+    assert_ne!(result, vec![0u8; 32]); // Not all zeros
 }
 ```
 
-### 5. Test Your Implementation
-```bash
-# Run specific precompile tests
-stylus-forge test sha3
+### Error Cases
 
-# Run all tests
+Always test what happens when things go wrong:
+
+```rust
+#[test]
+fn test_empty_input_fails() {
+    let hasher = MyHasher::new();
+    let result = hasher.compute(b"");
+    
+    assert!(result.is_err());
+    match result {
+        Err(MyError::EmptyInput) => (), // Expected
+        _ => panic!("Wrong error type"),
+    }
+}
+
+#[test]
+fn test_oversized_input_fails() {
+    let hasher = MyHasher::new();
+    let huge_input = vec![0u8; 1_000_000]; // 1MB
+    
+    let result = hasher.compute(&huge_input);
+    assert!(result.is_err());
+}
+```
+
+### Known Test Vectors
+
+If your algorithm has known outputs, use them:
+
+```rust
+#[test]
+fn test_known_vectors() {
+    let test_cases = vec![
+        ("", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"),
+        ("hello", "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"),
+    ];
+    
+    let hasher = Sha256::new();
+    for (input, expected) in test_cases {
+        let result = hasher.compute(input.as_bytes()).unwrap();
+        assert_eq!(hex::encode(result), expected);
+    }
+}
+```
+
+## Integration Testing
+
+This tests the full precompile interface.
+
+### ABI Encoding Test
+
+```rust
+#[test]
+fn test_abi_interface() {
+    // Create the call data like Solidity would
+    let input = U256::from(42);
+    let call_data = IMyPrecompile::computeCall { input }.abi_encode();
+    
+    // Add function selector
+    let mut full_input = IMyPrecompile::computeCall::SELECTOR.to_vec();
+    full_input.extend_from_slice(&call_data);
+    
+    // Call the precompile
+    let result = my_precompile(&full_input);
+    assert!(result.is_ok());
+    
+    // Check output format
+    let output = result.unwrap();
+    assert_eq!(output.len(), 32); // U256 = 32 bytes
+}
+```
+
+### Multiple Function Test
+
+If your precompile has multiple functions:
+
+```rust
+#[test]
+fn test_all_functions() {
+    // Test function 1
+    let result1 = call_precompile_function("hash", vec![1, 2, 3]);
+    assert!(result1.is_ok());
+    
+    // Test function 2
+    let result2 = call_precompile_function("verify", vec![4, 5, 6]);
+    assert!(result2.is_ok());
+    
+    // Make sure they're different functions
+    assert_ne!(result1, result2);
+}
+```
+
+## Contract Testing
+
+This is where you test from actual Solidity code.
+
+### Setup
+
+First, create a test contract:
+
+```solidity
+contract TestMyPrecompile {
+    IMyPrecompile constant precompile = IMyPrecompile(0x0100);
+    
+    function testBasicOperation() external pure returns (bytes memory) {
+        return precompile.compute("test");
+    }
+    
+    function testErrorHandling() external view {
+        try precompile.compute("") {
+            revert("Should have failed");
+        } catch {
+            // Expected
+        }
+    }
+}
+```
+
+### JavaScript Tests
+
+Write tests using Hardhat:
+
+```javascript
+describe("MyPrecompile", function () {
+    let tester;
+    
+    beforeEach(async function () {
+        const TestContract = await ethers.getContractFactory("TestMyPrecompile");
+        tester = await TestContract.deploy();
+    });
+    
+    it("should compute correctly", async function () {
+        const result = await tester.testBasicOperation();
+        expect(result).to.not.equal("0x");
+        expect(result.length).to.equal(66); // 0x + 64 hex chars
+    });
+    
+    it("should handle errors", async function () {
+        // This should not revert since the contract handles the error
+        await expect(tester.testErrorHandling()).to.not.be.reverted;
+    });
+});
+```
+
+## Gas Testing
+
+This is crucial for precompiles. The whole point is to save gas.
+
+### Benchmark Contract
+
+```solidity
+contract GasBenchmark {
+    function measurePrecompileGas(bytes calldata input) external returns (uint256) {
+        uint256 gasBefore = gasleft();
+        precompile.compute(input);
+        uint256 gasAfter = gasleft();
+        
+        return gasBefore - gasAfter;
+    }
+    
+    function measureSolidityGas(bytes calldata input) external returns (uint256) {
+        uint256 gasBefore = gasleft();
+        computeInSolidity(input);
+        uint256 gasAfter = gasleft();
+        
+        return gasBefore - gasAfter;
+    }
+}
+```
+
+### Running Benchmarks
+
+```javascript
+it("should use less gas than Solidity", async function () {
+    const input = ethers.utils.toUtf8Bytes("benchmark input");
+    
+    const precompileGas = await benchmark.measurePrecompileGas(input);
+    const solidityGas = await benchmark.measureSolidityGas(input);
+    
+    console.log(`Precompile: ${precompileGas} gas`);
+    console.log(`Solidity: ${solidityGas} gas`);
+    console.log(`Savings: ${Math.round((1 - precompileGas/solidityGas) * 100)}%`);
+    
+    expect(precompileGas).to.be.lessThan(solidityGas);
+});
+```
+
+## Debugging Failed Tests
+
+### When Unit Tests Fail
+
+Add debug output:
+```rust
+#[test]
+fn test_with_debugging() {
+    let input = b"test";
+    println!("Input: {:?}", input);
+    
+    let result = compute(input);
+    println!("Result: {:?}", result);
+    
+    assert!(result.is_ok());
+}
+```
+
+Run with output:
+```bash
+cargo test -- --nocapture
+```
+
+### When Integration Tests Fail
+
+Check the selector:
+```rust
+println!("Expected selector: {:?}", IMyPrecompile::computeCall::SELECTOR);
+println!("Received selector: {:?}", &input[0..4]);
+```
+
+### When Contract Tests Fail
+
+Use Hardhat console:
+```solidity
+import "hardhat/console.sol";
+
+function debug() external {
+    console.log("Calling precompile...");
+    bytes memory result = precompile.compute("test");
+    console.logBytes(result);
+}
+```
+
+## Test Coverage
+
+Make sure you test:
+- ✅ Normal inputs
+- ✅ Edge cases (empty, max size)
+- ✅ Invalid inputs
+- ✅ All functions
+- ✅ Gas usage
+- ✅ Concurrent calls
+
+## Running All Tests
+
+```bash
+# Rust tests
 cargo test
 
-# Run benchmarks
-cargo bench
+# Contract tests
+cd contracts
+npm test
+
+# Everything
+./scripts/test_all.sh
 ```
 
-### 6. Deploy to Arbitrum
+## CI/CD Integration
 
-#### Testnet Deployment
-```bash
-# Check WASM size
-stylus-forge build --release --check-size
-
-# Deploy to Sepolia
-export PRIVATE_KEY="your-test-private-key"
-stylus-forge deploy --network arbitrum-sepolia
+Add to your GitHub Actions:
+```yaml
+- name: Run tests
+  run: |
+    cargo test --all
+    cd contracts && npm test
 ```
 
-#### Mainnet Deployment
-```bash
-# Final checks
-cargo test --release
-cargo clippy -- -D warnings
+## The Most Important Test
 
-# Deploy to mainnet
-stylus-forge deploy --network arbitrum-one --private-key $MAINNET_KEY
-```
+Does it actually save gas? If not, why are we doing this?
 
-## How Developers Use Deployed Precompiles
+Always benchmark against the Solidity equivalent. That's the number that matters.
 
-### 1. In Solidity Contracts
-```solidity
-// Import the generated interface
-import "./interfaces/IKeccak256.sol";
+---
 
-contract MyProtocol {
-    // Reference deployed precompile
-    IKeccak256 constant KECCAK = IKeccak256(0x0000000000000000000000000000000000000102);
-    
-    function verifyHash(bytes calldata data, bytes32 expectedHash) external view returns (bool) {
-        bytes memory result = KECCAK.keccak256(data);
-        return keccak256(result) == expectedHash;
-    }
-}
-```
-
-### 2. In JavaScript/TypeScript
-```javascript
-const { ethers } = require('ethers');
-
-// ABI from generated interface
-const abi = ['function keccak256(bytes) view returns (bytes)'];
-
-// Connect to deployed precompile
-const precompile = new ethers.Contract(
-    '0x0000000000000000000000000000000000000102',
-    abi,
-    provider
-);
-
-// Use the precompile
-const hash = await precompile.keccak256(ethers.utils.toUtf8Bytes('Hello World'));
-```
-
-### 3. In Rust (via Stylus SDK)
-```rust
-use stylus_sdk::prelude::*;
-
-#[external]
-impl MyContract {
-    pub fn use_precompile(&self, data: Bytes) -> Result<Bytes, Vec<u8>> {
-        // Call the precompile at its deployed address
-        let result = call(
-            0, // value
-            Address::from([0u8; 20]), // precompile address
-            &data
-        )?;
-        Ok(result)
-    }
-}
-```
-
-## Benefits for the Ecosystem
-
-### 1. **For Protocol Developers**
-- Rapid prototyping of gas-efficient operations
-- Standardized structure for security audits
-- Easy integration with existing tools
-
-### 2. **For DApp Developers**
-- Access to optimized cryptographic functions
-- Significant gas savings (50-90% vs Solidity)
-- Type-safe interfaces
-
-### 3. **For the Arbitrum Ecosystem**
-- Standardized precompile development
-- Easier adoption of advanced cryptography
-- Growing library of reusable components
-
-## Example Use Cases
-
-### 1. **Zero-Knowledge Proofs**
-```bash
-stylus-forge create poseidon --description "Poseidon hash for ZK circuits"
-stylus-forge create pedersen --description "Pedersen commitments"
-```
-
-### 2. **Advanced Cryptography**
-```bash
-stylus-forge create bls_aggregate --description "BLS signature aggregation"
-stylus-forge create pairing_check --description "Pairing-based cryptography"
-```
-
-### 3. **Data Structures**
-```bash
-stylus-forge create sparse_merkle --description "Sparse Merkle tree operations"
-stylus-forge create bloom_filter --description "Probabilistic data structure"
-```
-
-## Testing Summary
-
-The stylus-forge CLI successfully:
-- ✅ Creates complete project structures
-- ✅ Generates all necessary files from templates
-- ✅ Provides comprehensive testing framework
-- ✅ Supports the full development lifecycle
-- ✅ Integrates with Arbitrum Stylus deployment
-
-This tool significantly reduces the barrier to entry for creating optimized on-chain operations, enabling developers to build more efficient and complex applications on Arbitrum.
+That's testing. Do it right, and your precompile will work. Skip it, and you'll find out in production.
